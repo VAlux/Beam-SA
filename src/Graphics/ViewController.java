@@ -7,6 +7,8 @@ import Board.CellType;
 import Board.WorkField;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -18,37 +20,45 @@ import java.util.ArrayList;
 public class ViewController extends JFrame {
     private JPanel pnlRoot;
     private JPanel pnlSurface;
+    private JButton btnObstacle;
+    private JButton btnEmitterStart;
+    private JButton btnEmitterFinish;
+    private JButton btnEmpty;
     private Canvas canvas;
+
     private ArrayList<GraphVertex> solution;
     private BoardController boardController;
-    private Brain brain;
-    private WorkField workField;
     private CellType selectedCellType;
+    private WorkField workField;
+    private Brain brain;
 
-    private final int FIELD_WIDTH = 6;
-    private final int FIELD_HEIGHT = 6;
+    private int columnsAmount;
+    private int rowsAmount;
 
     public ViewController() {
-        //frame initialization
-        setSize(600, 600);
+        setSize(800, 730);
+        setResizable(false);
         setTitle("RAY");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setContentPane(pnlRoot);
         solution = new ArrayList<GraphVertex>();
-        workField = new WorkField(FIELD_WIDTH, FIELD_HEIGHT);
+        columnsAmount = rowsAmount = 10; // default value.
+        workField = new WorkField(columnsAmount, rowsAmount);
         boardController = new BoardController(workField);
         boardController.initField();
         canvas.setWorkField(workField);
-        canvas.loadTileTextures("res/tileset.png");
+        canvas.loadTileset("res/tileset.png");
         MouseHandler handler = new MouseHandler();
         canvas.addMouseListener(handler);
         canvas.addMouseMotionListener(handler);
-        selectedCellType = CellType.EMITTER;
-        this.setVisible(true);
+        selectedCellType = CellType.OBSTACLE;
+        assignButtonIcons();
+        addActionListeners();
+        setVisible(true);
     }
 
     private void resetInitBoard(){
-        workField = new WorkField(FIELD_WIDTH, FIELD_HEIGHT);
+        workField = new WorkField(columnsAmount, rowsAmount);
         boardController.setWorkField(workField);
     }
 
@@ -58,23 +68,61 @@ public class ViewController extends JFrame {
     }
 
     private int getFieldRow(int y){
-        double tileHeight = getHeight() / FIELD_HEIGHT;
+        double tileHeight = canvas.getHeight() / rowsAmount;
         return (int) Math.floor(y / tileHeight);
     }
 
     private int getFieldColumn(int x) {
-        double tileWidth = getWidth() / FIELD_WIDTH;
+        double tileWidth = canvas.getWidth() / columnsAmount;
         return (int) Math.floor(x / tileWidth);
+    }
+
+    private void assignButtonIcons(){
+        btnEmpty.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_EMPTY)));
+        btnObstacle.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_OBSTACLE)));
+        btnEmitterStart.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_EMITTER_START)));
+        btnEmitterFinish.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_EMITTER_FINISH)));
     }
 
     private void createUIComponents() {
         try {
-            this.pnlSurface = new Canvas(); // set the canvas
+            pnlSurface = new Canvas(); // set the canvas
         } catch (IOException e) {
-            System.err.println(e.getLocalizedMessage());
+            e.printStackTrace();
         }
-        this.canvas = (Canvas)pnlSurface; // we just need to communicate with pnlSurface as with canvas, so we morph it.
+        canvas = (Canvas)pnlSurface; // we just need to communicate with pnlSurface as with canvas, so we morph it.
     }
+
+    private void addActionListeners() {
+        btnEmitterStart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedCellType = CellType.EMITTER_START;
+            }
+        });
+
+        btnEmitterFinish.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedCellType = CellType.EMITTER_FINISH;
+            }
+        });
+
+        btnObstacle.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedCellType = CellType.OBSTACLE;
+            }
+        });
+
+        btnEmpty.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedCellType = CellType.FREE;
+            }
+        });
+    }
+
     private class MouseHandler extends MouseAdapter {
 
         @Override
@@ -87,14 +135,14 @@ public class ViewController extends JFrame {
         @Override
         public void mouseExited(MouseEvent e) {
             super.mouseExited(e);
-            canvas.getUnderSelection().setLocation(-1, -1);
+            canvas.getSelection().setLocation(-1, -1);
             canvas.repaint();
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
             super.mouseMoved(e);
-            canvas.getUnderSelection().setLocation(getFieldColumn(e.getX()), getFieldRow(e.getY()));
+            canvas.getSelection().setLocation(getFieldColumn(e.getX()), getFieldRow(e.getY()));
             canvas.repaint();
         }
         @Override

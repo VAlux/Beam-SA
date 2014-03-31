@@ -6,5 +6,6 @@ package Board;
 public enum CellType {
     FREE,
     OBSTACLE,
-    EMITTER
+    EMITTER_START,
+    EMITTER_FINISH
 }

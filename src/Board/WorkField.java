@@ -16,9 +16,9 @@ public class WorkField {
     private int rowsAmount;
 
     public WorkField(int rows, int colls) {
-        cells = new Cell[rows][colls];
         rowsAmount = rows;
         collsAmount = colls;
+        cells = new Cell[rowsAmount][collsAmount];
     }
 
     @Override
