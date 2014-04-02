@@ -17,12 +17,12 @@ import java.util.ArrayList;
  */
 public class Canvas extends JPanel {
 
-    private WorkField workField;
-    private Dimension tileSize;
     private Font font;
-    private ArrayList<BufferedImage> tiles;
     private Point selection;
     private Color selectionColor;
+    private WorkField workField;
+    private Dimension tileSize;
+    private ArrayList<BufferedImage> tiles;
     private TilesetProcessor tilesetProcessor;
 
     public Canvas() throws IOException {
@@ -48,39 +48,15 @@ public class Canvas extends JPanel {
         setBackground(Color.GRAY);
         Graphics2D g2d = (Graphics2D) G;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setFont(font);
         g2d.setPaint(selectionColor);
         tileSize.setSize(getWidth() / workField.getCollsAmount(), getHeight() / workField.getRowsAmount());
         for (int i = 0; i < workField.getRowsAmount(); i++) {
             for (int j = 0; j < workField.getCollsAmount(); j++) {
-                switch (workField.getCell(i, j).getType()){
-                    case FREE:{
-                        g2d.drawImage(tiles.get(TextureIndexes.INDEX_EMPTY),
-                                i * tileSize.width, j * tileSize.height, tileSize.width, tileSize.height, null);
-                        break;
-                    }
-                    case OBSTACLE:{
-                        g2d.drawImage(tiles.get(TextureIndexes.INDEX_OBSTACLE),
-                                i * tileSize.width, j * tileSize.height, tileSize.width, tileSize.height, null);
-                        break;
-                    }
-                    case EMITTER_START:{
-                        g2d.drawImage(tiles.get(TextureIndexes.INDEX_EMITTER_START),
-                                i * tileSize.width, j * tileSize.height, tileSize.width, tileSize.height, null);
-                        break;
-                    }
-                    case EMITTER_FINISH: {
-                        g2d.drawImage(tiles.get(TextureIndexes.INDEX_EMITTER_FINISH),
-                                i * tileSize.width, j * tileSize.height, tileSize.width, tileSize.height, null);
-                        break;
-                    }
-                    default:{
-                        break;
-                    }
-                }
+                g2d.drawImage(tiles.get(workField.getCell(i, j).getType().getValue()),
+                        i * tileSize.width, j * tileSize.height, tileSize.width, tileSize.height, null);
             }
         }
-        if (selection.x >=0)
+        if (selection.x >= 0)
             g2d.fillRect(selection.x * tileSize.width, selection.y * tileSize.height, tileSize.width, tileSize.height);
     }
 

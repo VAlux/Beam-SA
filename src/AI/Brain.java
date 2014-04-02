@@ -4,8 +4,10 @@
 
 package AI;
 
+import Board.Cell;
+import Board.CellType;
+import Board.FieldController;
 import Board.WorkField;
-import Board.BoardController;
 
 import java.util.ArrayList;
 
@@ -17,84 +19,62 @@ import java.util.ArrayList;
 
 public class Brain {
 
-    private ArrayList<GraphVertex> opened;
-    private ArrayList<GraphVertex> closed;
-    private GraphVertex target;
-    private BoardController controller;
-    private GraphVertex NVert;
+    private ArrayList<Node> opened;
+    private Node start;
+    private Node finish;
+    private Node nVert;
+    private WorkField workField;
+    private FieldController controller;
 
-    public Brain(WorkField init, WorkField target) {
-        this.opened = new ArrayList<GraphVertex>();
-        this.closed = new ArrayList<GraphVertex>();
-        this.target = new GraphVertex(target);
-        this.NVert = new GraphVertex(init);
-        this.NVert.setParent(NVert); // root vertex with loop parent reference,
-        this.calcFitness(NVert); // Calc fitness for the initial vertex
-        this.opened.add(NVert);
-        this.controller = new BoardController(NVert.getWorkField());
+    public Brain(WorkField workField, Cell start, Cell finish) {
+        this.finish = new Node(finish);
+        this.workField = workField;
+        this.start = new Node(start);
+        nVert = new Node(start);
+        calcFitness(nVert); // Calc fitness for the initial vertex
+        opened = new ArrayList<>();
+        opened.add(nVert);
     }
 
-    public boolean findSolution() throws CloneNotSupportedException {
-        while(!getMinFitnessVertex().equals(target)){
+    public boolean findSolution(){
+        int maxOpenedNodesAmount = workField.getCellsAmount();
+        Node nextNode;
+        while(!getMinFitnessNode().equals(finish)){
             if(opened.isEmpty())
                 return false;
 
-            NVert = getMinFitnessVertex();
-            controller.setWorkField(NVert.getParent().getWorkField()); // we have to memorize exactly the PARENT to the current graph vertex.
-    //        controller.memorizeState(); // this should be done before beginning the next transition sequence to avoid "mirroring" transitions.
-            closed.add(NVert);
-            opened.remove(NVert);
-            GraphVertex newVertex = prepareToOpenFrom(NVert);
-//            for (Point direction : MoveDirections.toList()){
-//                if(controller.performMove(direction.x, direction.y)){
-//                    calcFitness(newVertex);
-//                    newVertex.setParent(NVert);
-//                    if(updateList(newVertex, opened, true) || updateList(newVertex, closed, false)) // search for the same vertices in opened and closed lists
-//                        continue;
-//                    opened.add(newVertex);
-//                    newVertex = prepareToOpenFrom(NVert);
-//                }
-//            }
+            nextNode = getMinFitnessNode();
+            nextNode.setParent(nVert);
+            nVert = nextNode;
+            opened.remove(nVert);
+            expandNode(nVert);
+            if (opened.size() > maxOpenedNodesAmount)
+                opened.remove(getMaxFitnessNode());
         }
         return true;
     }
 
-    private GraphVertex prepareToOpenFrom(GraphVertex vertex) throws CloneNotSupportedException {
-        GraphVertex newVertex = vertex.clone();
-        newVertex.setLevel(vertex.getLevel() + 1); // deepness increased.
-        controller.setWorkField(newVertex.getWorkField());
-        return newVertex;
-    }
-
-    private boolean updateList(GraphVertex vertex, ArrayList<GraphVertex> list, boolean isOpened){
-                int equal;
-                boolean equalsFound = false;
-                for (int k = 0; k < list.size(); k++){
-                    equal = 0;
-                    for (int i = 0; i < vertex.getWorkField().getRowsAmount(); i++){
-                        for(int j = 0; j < vertex.getWorkField().getCollsAmount(); j++){
-                            if (list.get(k).getWorkField().getCell(i, j) == vertex.getWorkField().getCell(i, j))
-                                equal++;
-                        }
+    private void expandNode (Node node) {
+        Node neighbourNode;
+        Cell neighbourCell;
+        for (int i = node.getY() - 1; i <= node.getY() + 1; i++) {
+            for (int j = node.getX() - 1; j <= node.getX() + 1; j++) {
+                if (i != node.getY() || j != node.getX()) {
+                    neighbourCell = workField.getCell(j, i);
+                    if (neighbourCell.getType() == CellType.OBSTACLE) {
+                        continue;
                     }
-                    if(equal == vertex.getWorkField().getBricksAmount()){
-                        equalsFound = true;
-                        if(list.get(k).getFitness() > vertex.getFitness()) {
-                            list.get(k).setFitness(vertex.getFitness());
-                            list.get(k).setParent(vertex.getParent());
-                            if(!isOpened){
-                                opened.add(list.get(k));
-                                closed.remove(list.get(k));
-                            }
-                        }
+                    neighbourNode = new Node(neighbourCell);
+                    calcFitness(neighbourNode);
+                    opened.add(neighbourNode);
+                }
             }
         }
-        return equalsFound;
     }
 
-    private GraphVertex getMinFitnessVertex(){
-        GraphVertex minFitnessVertex = opened.get(0);
-        for(GraphVertex vertex : opened){
+    private Node getMinFitnessNode(){
+        Node minFitnessVertex = opened.get(0);
+        for(Node vertex : opened){
             if(minFitnessVertex.getFitness() > vertex.getFitness()){
                 minFitnessVertex = vertex;
             }
@@ -102,26 +82,32 @@ public class Brain {
         return minFitnessVertex;
     }
 
-    private void calcFitness(GraphVertex vertex){
-        int nInPlace = 0; // bricks amount, that are not in the right place
-        for (int i = 0; i < target.getWorkField().getRowsAmount(); i++){
-            for (int j = 0; j < target.getWorkField().getCollsAmount(); j++){
-                if(vertex.getWorkField().getCell(i, j) != target.getWorkField().getCell(i, j)){
-                    nInPlace++;
-                }
+    private Node getMaxFitnessNode(){
+        Node maxFitnessVertex = opened.get(0);
+        for(Node vertex : opened){
+            if(maxFitnessVertex.getFitness() < vertex.getFitness()){
+                maxFitnessVertex = vertex;
             }
         }
-        vertex.setFitness(vertex.getLevel() + nInPlace);
+        return maxFitnessVertex;
     }
 
-    public ArrayList<GraphVertex> getSolution() {
-        //restore the solution path using parent references.
-        ArrayList<GraphVertex> solution = new ArrayList<GraphVertex>();
-        GraphVertex target = getMinFitnessVertex();
-        solution.add(target);
-        while(target.hasParent()){
-            target = target.getParent();
-            solution.add(target);
+    private void calcFitness(Node vertex) {
+        int dx = Math.abs(finish.getX() - vertex.getX());
+        int dy = Math.abs(finish.getY() - vertex.getY());
+        vertex.setFitness(dx + dy);
+    }
+
+    /**
+     * Restore the solution path using parent references.
+     * @return sequence of nodes, representing the path from start to the end.
+     */
+    public ArrayList<Node> getSolution() {
+        ArrayList<Node> solution = new ArrayList<>();
+        solution.add(nVert);
+        while(!nVert.getParent().equals(start)){
+            nVert = nVert.getParent();
+            solution.add(nVert);
         }
         return solution;
     }

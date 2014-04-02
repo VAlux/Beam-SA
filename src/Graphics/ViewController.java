@@ -1,8 +1,9 @@
 package Graphics;
 
 import AI.Brain;
-import AI.GraphVertex;
-import Board.BoardController;
+import AI.Node;
+import Board.FieldController;
+import Board.Cell;
 import Board.CellType;
 import Board.WorkField;
 
@@ -18,16 +19,19 @@ import java.util.ArrayList;
  * Created by Lux on 29.03.2014.
  */
 public class ViewController extends JFrame {
-    private JPanel pnlRoot;
+    private JTabbedPane tpnTools;
     private JPanel pnlSurface;
-    private JButton btnObstacle;
-    private JButton btnEmitterStart;
-    private JButton btnEmitterFinish;
-    private JButton btnEmpty;
-    private Canvas canvas;
+    private JPanel pnlRoot;
 
-    private ArrayList<GraphVertex> solution;
-    private BoardController boardController;
+    private JButton btnEmpty;
+    private JButton btnObstacle;
+    private JButton btnEmrStart;
+    private JButton btnEmrFinish;
+    private JButton btnFind;
+
+    private Canvas canvas;
+    private ArrayList<Node> solution;
+    private FieldController fieldController;
     private CellType selectedCellType;
     private WorkField workField;
     private Brain brain;
@@ -36,16 +40,16 @@ public class ViewController extends JFrame {
     private int rowsAmount;
 
     public ViewController() {
-        setSize(800, 730);
+        setSize(890, 730);
         setResizable(false);
         setTitle("RAY");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setContentPane(pnlRoot);
-        solution = new ArrayList<GraphVertex>();
+        solution = new ArrayList<Node>();
         columnsAmount = rowsAmount = 10; // default value.
         workField = new WorkField(columnsAmount, rowsAmount);
-        boardController = new BoardController(workField);
-        boardController.initField();
+        fieldController = new FieldController(workField);
+        fieldController.initField();
         canvas.setWorkField(workField);
         canvas.loadTileset("res/tileset.png");
         MouseHandler handler = new MouseHandler();
@@ -59,7 +63,7 @@ public class ViewController extends JFrame {
 
     private void resetInitBoard(){
         workField = new WorkField(columnsAmount, rowsAmount);
-        boardController.setWorkField(workField);
+        fieldController.setWorkField(workField);
     }
 
     private void reset(){
@@ -78,10 +82,10 @@ public class ViewController extends JFrame {
     }
 
     private void assignButtonIcons(){
-        btnEmpty.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_EMPTY)));
-        btnObstacle.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_OBSTACLE)));
-        btnEmitterStart.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_EMITTER_START)));
-        btnEmitterFinish.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(TextureIndexes.INDEX_EMITTER_FINISH)));
+        btnEmpty.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.FREE.getValue())));
+        btnObstacle.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.OBSTACLE.getValue())));
+        btnEmrStart.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_START.getValue())));
+        btnEmrFinish.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_FINISH.getValue())));
     }
 
     private void createUIComponents() {
@@ -94,14 +98,14 @@ public class ViewController extends JFrame {
     }
 
     private void addActionListeners() {
-        btnEmitterStart.addActionListener(new ActionListener() {
+        btnEmrStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 selectedCellType = CellType.EMITTER_START;
             }
         });
 
-        btnEmitterFinish.addActionListener(new ActionListener() {
+        btnEmrFinish.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 selectedCellType = CellType.EMITTER_FINISH;
@@ -119,6 +123,22 @@ public class ViewController extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 selectedCellType = CellType.FREE;
+            }
+        });
+
+        btnFind.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Cell start = fieldController.findCell(CellType.EMITTER_START);
+                Cell finish = fieldController.findCell(CellType.EMITTER_FINISH);
+                assert start != null && finish != null;
+                brain = new Brain(workField, start, finish);
+                if(brain.findSolution()){
+                    for (Node node : brain.getSolution()) {
+                        workField.setCellType(node.getX(), node.getY(), CellType.PATH);
+                    }
+                    canvas.repaint();
+                }
             }
         });
     }

@@ -15,7 +15,7 @@ public class Cell {
         this.type = type;
     }
 
-    private Cell(CellType type, int xPos, int yPos) {
+    public Cell(CellType type, int xPos, int yPos) {
         this.type = type;
         this.xPos = xPos;
         this.yPos = yPos;
@@ -27,5 +27,18 @@ public class Cell {
 
     public void setType(CellType type) {
         this.type = type;
+    }
+
+    public int getyPos() {
+        return yPos;
+    }
+
+    public int getxPos() {
+        return xPos;
+    }
+
+    @Override
+    public String toString() {
+        return "X: " + xPos + " Y: " + yPos;
     }
 }

@@ -62,10 +62,6 @@ public final class TilesetProcessor {
         return slicedTileset.get(index);
     }
 
-    public ArrayList<BufferedImage> getSlicedTileset() {
-        return slicedTileset;
-    }
-
     public void setTileset(BufferedImage tileset) {
         this.tileset = tileset;
     }

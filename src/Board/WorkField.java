@@ -64,7 +64,7 @@ public class WorkField {
         cells[row][column].setType(type);
     }
 
-    public int getBricksAmount(){
+    public int getCellsAmount(){
         return collsAmount * rowsAmount;
     }
 }
