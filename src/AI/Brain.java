@@ -6,7 +6,6 @@ package AI;
 
 import Board.Cell;
 import Board.CellType;
-import Board.FieldController;
 import Board.WorkField;
 
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ public class Brain {
     private Node finish;
     private Node nVert;
     private WorkField workField;
-    private FieldController controller;
 
     public Brain(WorkField workField, Cell start, Cell finish) {
         this.finish = new Node(finish);
@@ -37,7 +35,7 @@ public class Brain {
     }
 
     public boolean findSolution(){
-        int maxOpenedNodesAmount = workField.getCellsAmount();
+        int maxOpenedNodesAmount = 10;
         Node nextNode;
         while(!getMinFitnessNode().equals(finish)){
             if(opened.isEmpty())

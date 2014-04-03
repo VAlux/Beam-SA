@@ -22,10 +22,7 @@ public class Node {
             return false;
 
         Node node = (Node) other;
-        if (cell.getxPos() == node.getX() && cell.getyPos() == node.getY())
-            return true;
-
-        return false;
+        return cell.getxPos() == node.getX() && cell.getyPos() == node.getY();
     }
 
     @Override

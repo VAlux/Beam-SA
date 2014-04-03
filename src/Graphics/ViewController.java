@@ -22,12 +22,18 @@ public class ViewController extends JFrame {
     private JTabbedPane tpnTools;
     private JPanel pnlSurface;
     private JPanel pnlRoot;
+    private JPanel pnlAlgorithm;
+    private JLabel lblMapLabel;
 
     private JButton btnEmpty;
     private JButton btnObstacle;
     private JButton btnEmrStart;
     private JButton btnEmrFinish;
     private JButton btnFind;
+    private JButton btnClear;
+    private JButton btnGenerate;
+    private JButton btnSave;
+    private JButton btnLoad;
 
     private Canvas canvas;
     private ArrayList<Node> solution;
@@ -40,18 +46,17 @@ public class ViewController extends JFrame {
     private int rowsAmount;
 
     public ViewController() {
-        setSize(890, 730);
-        setResizable(false);
+        setSize(850, 710);
         setTitle("RAY");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setContentPane(pnlRoot);
-        solution = new ArrayList<Node>();
+        solution = new ArrayList<>();
         columnsAmount = rowsAmount = 10; // default value.
         workField = new WorkField(columnsAmount, rowsAmount);
         fieldController = new FieldController(workField);
         fieldController.initField();
         canvas.setWorkField(workField);
-        canvas.loadTileset("res/tileset.png");
+        canvas.loadTileset("res/tileset3.png");
         MouseHandler handler = new MouseHandler();
         canvas.addMouseListener(handler);
         canvas.addMouseMotionListener(handler);
@@ -126,15 +131,34 @@ public class ViewController extends JFrame {
             }
         });
 
+        btnClear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fieldController.clearField();
+                solution.clear();
+                canvas.repaint();
+            }
+        });
+
+        btnGenerate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fieldController.generateObjects(CellType.OBSTACLE);
+                canvas.repaint();
+            }
+        });
+
         btnFind.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                fieldController.morphCells(CellType.PATH, CellType.FREE); // clear previous result.
                 Cell start = fieldController.findCell(CellType.EMITTER_START);
                 Cell finish = fieldController.findCell(CellType.EMITTER_FINISH);
                 assert start != null && finish != null;
                 brain = new Brain(workField, start, finish);
-                if(brain.findSolution()){
-                    for (Node node : brain.getSolution()) {
+                if(brain.findSolution()) {
+                    solution = brain.getSolution();
+                    for (Node node : solution) {
                         workField.setCellType(node.getX(), node.getY(), CellType.PATH);
                     }
                     canvas.repaint();
@@ -148,7 +172,10 @@ public class ViewController extends JFrame {
         @Override
         public void mousePressed(MouseEvent e) {
             super.mousePressed(e);
-            workField.setCellType(getFieldColumn(e.getX()), getFieldRow(e.getY()), selectedCellType);
+            if (e.getButton() == MouseEvent.BUTTON1)
+                workField.setCellType(getFieldColumn(e.getX()), getFieldRow(e.getY()), selectedCellType);
+            else
+                workField.setCellType(getFieldColumn(e.getX()), getFieldRow(e.getY()), CellType.FREE);
             canvas.repaint();
         }
 
@@ -169,6 +196,7 @@ public class ViewController extends JFrame {
         public void mouseDragged(MouseEvent e) {
             super.mouseDragged(e);
             mouseMoved(e);
+            workField.setCellType(getFieldColumn(e.getX()), getFieldRow(e.getY()), selectedCellType);
         }
     }
 }
