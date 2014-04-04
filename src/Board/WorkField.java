@@ -56,6 +56,10 @@ public class WorkField {
         return cells[row][column];
     }
 
+    public CellType getCellType(int row, int column) {
+        return cells[row][column].getType();
+    }
+
     public void setCell(int row, int column, Cell cell){
         cells[row][column] = cell;
     }

@@ -36,7 +36,7 @@ public class Canvas extends JPanel {
 
     public void loadTileset(String tilesetPath) {
         tilesetProcessor = new TilesetProcessor(tilesetPath);
-        tiles = tilesetProcessor.splitIntoChunks(1, 5, 128, 128);
+        tiles = tilesetProcessor.splitIntoChunks(4, 6, 64, 64);
     }
 
     @Override

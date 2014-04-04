@@ -2,9 +2,9 @@ package Graphics;
 
 import AI.Brain;
 import AI.Node;
-import Board.FieldController;
 import Board.Cell;
 import Board.CellType;
+import Board.FieldController;
 import Board.WorkField;
 
 import javax.swing.*;
@@ -14,6 +14,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 
 /**
  * Created by Lux on 29.03.2014.
@@ -51,12 +53,12 @@ public class ViewController extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setContentPane(pnlRoot);
         solution = new ArrayList<>();
-        columnsAmount = rowsAmount = 10; // default value.
+        columnsAmount = rowsAmount = 16; // default value.
         workField = new WorkField(columnsAmount, rowsAmount);
         fieldController = new FieldController(workField);
         fieldController.initField();
         canvas.setWorkField(workField);
-        canvas.loadTileset("res/tileset3.png");
+        canvas.loadTileset("tilesets/tileset.png");
         MouseHandler handler = new MouseHandler();
         canvas.addMouseListener(handler);
         canvas.addMouseMotionListener(handler);
@@ -91,6 +93,11 @@ public class ViewController extends JFrame {
         btnObstacle.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.OBSTACLE.getValue())));
         btnEmrStart.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_START.getValue())));
         btnEmrFinish.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_FINISH.getValue())));
+        btnFind.setIcon(new ImageIcon("icons/path.png"));
+        btnLoad.setIcon(new ImageIcon("icons/search.png"));
+        btnSave.setIcon(new ImageIcon("icons/save.png"));
+        btnClear.setIcon(new ImageIcon("icons/cancel.png"));
+        btnGenerate.setIcon(new ImageIcon("icons/setting.png"));
     }
 
     private void createUIComponents() {
@@ -145,6 +152,26 @@ public class ViewController extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 fieldController.generateObjects(CellType.OBSTACLE);
                 canvas.repaint();
+            }
+        });
+
+        btnSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String filename = JOptionPane.showInputDialog(canvas, "Map name: ", "Input Map Name", QUESTION_MESSAGE);
+                fieldController.saveToFile("maps/" + filename);
+            }
+        });
+
+        btnLoad.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                int choice;
+                choice = chooser.showDialog(canvas, "Open");
+                if (choice == JFileChooser.APPROVE_OPTION) {
+                    fieldController.loadFromFile(chooser.getSelectedFile().getPath());
+                }
             }
         });
 

@@ -3,6 +3,7 @@ package Board;
  * Copyright (c) 2013. Created by Alexander Voevodin [Alvo]
  */
 
+import java.io.*;
 import java.util.Random;
 
 public class FieldController {
@@ -60,6 +61,39 @@ public class FieldController {
                 if (rnd.nextInt(5) == 0)
                     workField.setCellType(m, n, type);
             }
+        }
+    }
+
+    public void saveToFile(String path) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+            for (int m = 0; m < workField.getRowsAmount(); m++) {
+                for (int n = 0; n < workField.getCollsAmount(); n++) {
+                    writer.write(String.valueOf(workField.getCellType(m, n).getValue()) + " ");
+                }
+                writer.write("\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadFromFile(String path) {
+        clearField();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(path));
+            String row;
+            String [] cellTypes;
+            for (int i = 0; i < workField.getRowsAmount(); i++) {
+                row = reader.readLine();
+                cellTypes = row.split(" ");
+                for (int j = 0; j < workField.getCollsAmount(); j++) {
+                    workField.setCellType(i, j, CellType.fromValue(Integer.parseInt(cellTypes[j])));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
