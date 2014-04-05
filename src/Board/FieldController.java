@@ -64,36 +64,28 @@ public class FieldController {
         }
     }
 
-    public void saveToFile(String path) {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-            for (int m = 0; m < workField.getRowsAmount(); m++) {
-                for (int n = 0; n < workField.getCollsAmount(); n++) {
-                    writer.write(String.valueOf(workField.getCellType(m, n).getValue()) + " ");
-                }
-                writer.write("\n");
+    public void saveToFile(String path) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        for (int m = 0; m < workField.getRowsAmount(); m++) {
+            for (int n = 0; n < workField.getCollsAmount(); n++) {
+                writer.write(String.valueOf(workField.getCellType(m, n).getValue()) + " ");
             }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            writer.write("\n");
         }
+        writer.close();
     }
 
-    public void loadFromFile(String path) {
+    public void loadFromFile(String path) throws IOException, NumberFormatException {
         clearField();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(path));
-            String row;
-            String [] cellTypes;
-            for (int i = 0; i < workField.getRowsAmount(); i++) {
-                row = reader.readLine();
-                cellTypes = row.split(" ");
-                for (int j = 0; j < workField.getCollsAmount(); j++) {
-                    workField.setCellType(i, j, CellType.fromValue(Integer.parseInt(cellTypes[j])));
-                }
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        String row;
+        String[] cellTypes;
+        for (int i = 0; i < workField.getRowsAmount(); i++) {
+            row = reader.readLine();
+            cellTypes = row.split(" ");
+            for (int j = 0; j < workField.getCollsAmount(); j++) {
+                workField.setCellType(i, j, CellType.fromValue(Integer.parseInt(cellTypes[j])));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

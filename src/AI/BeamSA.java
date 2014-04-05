@@ -16,15 +16,9 @@ import java.util.ArrayList;
  * Time: 21:50
  */
 
-public class Brain {
+public class BeamSA extends SearchAlgorithm{
 
-    private ArrayList<Node> opened;
-    private Node start;
-    private Node finish;
-    private Node nVert;
-    private WorkField workField;
-
-    public Brain(WorkField workField, Cell start, Cell finish) {
+    public BeamSA(WorkField workField, Cell start, Cell finish) {
         this.finish = new Node(finish);
         this.workField = workField;
         this.start = new Node(start);
@@ -52,7 +46,8 @@ public class Brain {
         return true;
     }
 
-    private void expandNode (Node node) {
+    // package - local
+    void expandNode (Node node) {
         Node neighbourNode;
         Cell neighbourCell;
         for (int i = node.getY() - 1; i <= node.getY() + 1; i++) {
@@ -70,7 +65,8 @@ public class Brain {
         }
     }
 
-    private Node getMinFitnessNode(){
+    //package - local
+    Node getMinFitnessNode(){
         Node minFitnessVertex = opened.get(0);
         for(Node vertex : opened){
             if(minFitnessVertex.getFitness() > vertex.getFitness()){
@@ -80,7 +76,8 @@ public class Brain {
         return minFitnessVertex;
     }
 
-    private Node getMaxFitnessNode(){
+    //package - local
+    Node getMaxFitnessNode(){
         Node maxFitnessVertex = opened.get(0);
         for(Node vertex : opened){
             if(maxFitnessVertex.getFitness() < vertex.getFitness()){
@@ -90,10 +87,10 @@ public class Brain {
         return maxFitnessVertex;
     }
 
-    private void calcFitness(Node vertex) {
-        int dx = Math.abs(finish.getX() - vertex.getX());
-        int dy = Math.abs(finish.getY() - vertex.getY());
-        vertex.setFitness(dx + dy);
+    void calcFitness(Node node) {
+        int dx = Math.abs(finish.getX() - node.getX());
+        int dy = Math.abs(finish.getY() - node.getY());
+        node.setFitness(dx + dy);
     }
 
     /**

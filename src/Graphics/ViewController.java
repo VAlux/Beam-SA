@@ -1,6 +1,6 @@
 package Graphics;
 
-import AI.Brain;
+import AI.BeamSA;
 import AI.Node;
 import Board.Cell;
 import Board.CellType;
@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -42,7 +43,7 @@ public class ViewController extends JFrame {
     private FieldController fieldController;
     private CellType selectedCellType;
     private WorkField workField;
-    private Brain brain;
+    private BeamSA beamSA;
 
     private int columnsAmount;
     private int rowsAmount;
@@ -58,7 +59,7 @@ public class ViewController extends JFrame {
         fieldController = new FieldController(workField);
         fieldController.initField();
         canvas.setWorkField(workField);
-        canvas.loadTileset("tilesets/tileset.png");
+        canvas.loadTileset(formTilesetPath("tileset.png"));
         MouseHandler handler = new MouseHandler();
         canvas.addMouseListener(handler);
         canvas.addMouseMotionListener(handler);
@@ -66,6 +67,10 @@ public class ViewController extends JFrame {
         assignButtonIcons();
         addActionListeners();
         setVisible(true);
+    }
+
+    private String formTilesetPath(String tilesetName) {
+        return System.getProperty("user.dir") + File.separator + "tilesets" + File.separator + tilesetName;
     }
 
     private void resetInitBoard(){
@@ -93,11 +98,11 @@ public class ViewController extends JFrame {
         btnObstacle.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.OBSTACLE.getValue())));
         btnEmrStart.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_START.getValue())));
         btnEmrFinish.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_FINISH.getValue())));
-        btnFind.setIcon(new ImageIcon("icons/path.png"));
-        btnLoad.setIcon(new ImageIcon("icons/search.png"));
-        btnSave.setIcon(new ImageIcon("icons/save.png"));
-        btnClear.setIcon(new ImageIcon("icons/cancel.png"));
-        btnGenerate.setIcon(new ImageIcon("icons/setting.png"));
+        btnFind.setIcon(new ImageIcon(getClass().getClassLoader().getResource("path.png")));
+        btnLoad.setIcon(new ImageIcon(getClass().getClassLoader().getResource("search.png")));
+        btnSave.setIcon(new ImageIcon(getClass().getClassLoader().getResource("save.png")));
+        btnClear.setIcon(new ImageIcon(getClass().getClassLoader().getResource("cancel.png")));
+        btnGenerate.setIcon(new ImageIcon(getClass().getClassLoader().getResource("setting.png")));
     }
 
     private void createUIComponents() {
@@ -159,7 +164,13 @@ public class ViewController extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String filename = JOptionPane.showInputDialog(canvas, "Map name: ", "Input Map Name", QUESTION_MESSAGE);
-                fieldController.saveToFile("maps/" + filename);
+                if (filename == null)
+                    return;
+                try {
+                    fieldController.saveToFile("maps/" + filename);
+                } catch (IOException e1) {
+                    showErrorMsg("Filename is invalid or empty");
+                }
             }
         });
 
@@ -170,7 +181,11 @@ public class ViewController extends JFrame {
                 int choice;
                 choice = chooser.showDialog(canvas, "Open");
                 if (choice == JFileChooser.APPROVE_OPTION) {
-                    fieldController.loadFromFile(chooser.getSelectedFile().getPath());
+                    try {
+                        fieldController.loadFromFile(chooser.getSelectedFile().getPath());
+                    } catch (IOException | NumberFormatException e1) {
+                        showErrorMsg("Can't load file: " + chooser.getSelectedFile());
+                    }
                 }
             }
         });
@@ -182,9 +197,9 @@ public class ViewController extends JFrame {
                 Cell start = fieldController.findCell(CellType.EMITTER_START);
                 Cell finish = fieldController.findCell(CellType.EMITTER_FINISH);
                 assert start != null && finish != null;
-                brain = new Brain(workField, start, finish);
-                if(brain.findSolution()) {
-                    solution = brain.getSolution();
+                beamSA = new BeamSA(workField, start, finish);
+                if(beamSA.findSolution()) {
+                    solution = beamSA.getSolution();
                     for (Node node : solution) {
                         workField.setCellType(node.getX(), node.getY(), CellType.PATH);
                     }
@@ -192,6 +207,10 @@ public class ViewController extends JFrame {
                 }
             }
         });
+    }
+
+    private void showErrorMsg(String errorText) {
+        JOptionPane.showMessageDialog(this, errorText, "IOError", JOptionPane.ERROR_MESSAGE);
     }
 
     private class MouseHandler extends MouseAdapter {

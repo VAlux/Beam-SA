@@ -15,13 +15,9 @@ public final class TilesetProcessor {
     private BufferedImage tileset;
     private ArrayList<BufferedImage> slicedTileset;
 
-    public TilesetProcessor(BufferedImage tileset) {
-        this.tileset = tileset;
-    }
-
     public TilesetProcessor(String tilesetPath) {
         try {
-            tileset = loadImage(new File(tilesetPath));
+            tileset = loadImage(tilesetPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,8 +45,8 @@ public final class TilesetProcessor {
         return chunks;
     }
 
-    private BufferedImage loadImage(File source) throws IOException {
-        BufferedImage tmp = ImageIO.read(source);
+    private BufferedImage loadImage(String source) throws IOException {
+        BufferedImage tmp = ImageIO.read(new File(source));
         int width = tmp.getWidth();
         int height = tmp.getHeight();
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
