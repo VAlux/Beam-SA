@@ -83,15 +83,7 @@ public class ViewController extends JFrame {
         resetInitBoard();
     }
 
-    private int getFieldRow(int y){
-        double tileHeight = canvas.getHeight() / rowsAmount;
-        return (int) Math.floor(y / tileHeight);
-    }
 
-    private int getFieldColumn(int x) {
-        double tileWidth = canvas.getWidth() / columnsAmount;
-        return (int) Math.floor(x / tileWidth);
-    }
 
     private void assignButtonIcons(){
         btnEmpty.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.FREE.getValue())));
@@ -177,7 +169,7 @@ public class ViewController extends JFrame {
         btnLoad.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser chooser = new JFileChooser();
+                JFileChooser chooser = new JFileChooser(System.getProperty("user.dir"));
                 int choice;
                 choice = chooser.showDialog(canvas, "Open");
                 if (choice == JFileChooser.APPROVE_OPTION) {
@@ -204,13 +196,25 @@ public class ViewController extends JFrame {
                         workField.setCellType(node.getX(), node.getY(), CellType.PATH);
                     }
                     canvas.repaint();
+                } else {
+                  showErrorMsg("i am stuck!");
                 }
             }
         });
     }
 
     private void showErrorMsg(String errorText) {
-        JOptionPane.showMessageDialog(this, errorText, "IOError", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, errorText, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private int getFieldRow(int y){
+        double tileHeight = canvas.getHeight() / rowsAmount;
+        return (int) Math.floor(y / tileHeight);
+    }
+
+    private int getFieldColumn(int x) {
+        double tileWidth = canvas.getWidth() / columnsAmount;
+        return (int) Math.floor(x / tileWidth);
     }
 
     private class MouseHandler extends MouseAdapter {

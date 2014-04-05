@@ -28,18 +28,25 @@ public class BeamSA extends SearchAlgorithm{
         opened.add(nVert);
     }
 
+    @Override
     public boolean findSolution(){
         int maxOpenedNodesAmount = 10;
-        Node nextNode;
+        Node nextNode, prevNode = null;
         while(!getMinFitnessNode().equals(finish)){
             if(opened.isEmpty())
                 return false;
 
             nextNode = getMinFitnessNode();
+            if (prevNode != null && nextNode.equals(prevNode.getParent())) { // can't find solution.
+                return false;
+            }
+
+            prevNode = nextNode;
             nextNode.setParent(nVert);
             nVert = nextNode;
             opened.remove(nVert);
             expandNode(nVert);
+
             if (opened.size() > maxOpenedNodesAmount)
                 opened.remove(getMaxFitnessNode());
         }
@@ -47,6 +54,7 @@ public class BeamSA extends SearchAlgorithm{
     }
 
     // package - local
+    @Override
     void expandNode (Node node) {
         Node neighbourNode;
         Cell neighbourCell;
@@ -66,27 +74,30 @@ public class BeamSA extends SearchAlgorithm{
     }
 
     //package - local
+    @Override
     Node getMinFitnessNode(){
-        Node minFitnessVertex = opened.get(0);
+        Node minFitnessNode = opened.get(0);
         for(Node vertex : opened){
-            if(minFitnessVertex.getFitness() > vertex.getFitness()){
-                minFitnessVertex = vertex;
+            if(minFitnessNode.getFitness() > vertex.getFitness()){
+                minFitnessNode = vertex;
             }
         }
-        return minFitnessVertex;
+        return minFitnessNode;
     }
 
     //package - local
+    @Override
     Node getMaxFitnessNode(){
-        Node maxFitnessVertex = opened.get(0);
+        Node maxFitnessNode = opened.get(0);
         for(Node vertex : opened){
-            if(maxFitnessVertex.getFitness() < vertex.getFitness()){
-                maxFitnessVertex = vertex;
+            if(maxFitnessNode.getFitness() < vertex.getFitness()){
+                maxFitnessNode = vertex;
             }
         }
-        return maxFitnessVertex;
+        return maxFitnessNode;
     }
 
+    @Override
     void calcFitness(Node node) {
         int dx = Math.abs(finish.getX() - node.getX());
         int dy = Math.abs(finish.getY() - node.getY());
@@ -97,6 +108,7 @@ public class BeamSA extends SearchAlgorithm{
      * Restore the solution path using parent references.
      * @return sequence of nodes, representing the path from start to the end.
      */
+    @Override
     public ArrayList<Node> getSolution() {
         ArrayList<Node> solution = new ArrayList<>();
         solution.add(nVert);
