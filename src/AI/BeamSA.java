@@ -33,20 +33,18 @@ public class BeamSA extends SearchAlgorithm{
         int maxOpenedNodesAmount = 10;
         Node nextNode, prevNode = null;
         while(!getMinFitnessNode().equals(finish)){
-            if(opened.isEmpty())
+            if(opened.isEmpty()) {
                 return false;
-
+            }
             nextNode = getMinFitnessNode();
             if (prevNode != null && nextNode.equals(prevNode.getParent())) { // can't find solution.
                 return false;
             }
-
             prevNode = nextNode;
             nextNode.setParent(nVert);
             nVert = nextNode;
             opened.remove(nVert);
             expandNode(nVert);
-
             if (opened.size() > maxOpenedNodesAmount)
                 opened.remove(getMaxFitnessNode());
         }
@@ -102,20 +100,5 @@ public class BeamSA extends SearchAlgorithm{
         int dx = Math.abs(finish.getX() - node.getX());
         int dy = Math.abs(finish.getY() - node.getY());
         node.setFitness(dx + dy);
-    }
-
-    /**
-     * Restore the solution path using parent references.
-     * @return sequence of nodes, representing the path from start to the end.
-     */
-    @Override
-    public ArrayList<Node> getSolution() {
-        ArrayList<Node> solution = new ArrayList<>();
-        solution.add(nVert);
-        while(!nVert.getParent().equals(start)){
-            nVert = nVert.getParent();
-            solution.add(nVert);
-        }
-        return solution;
     }
 }

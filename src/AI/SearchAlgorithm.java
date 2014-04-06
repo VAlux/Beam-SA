@@ -21,5 +21,18 @@ public abstract class SearchAlgorithm {
     abstract void calcFitness(Node node);
     //
     public abstract boolean findSolution();
-    public abstract ArrayList<Node> getSolution();
+
+    /**
+     * Restore the solution path using parent references.
+     * @return sequence of nodes, representing the path from start to the end.
+     */
+    public ArrayList<Node> getSolution(){
+        ArrayList<Node> solution = new ArrayList<>();
+        solution.add(nVert);
+        while(!nVert.getParent().equals(start)){
+            nVert = nVert.getParent();
+            solution.add(nVert);
+        }
+        return solution;
+    }
 }

@@ -8,6 +8,8 @@ import Board.FieldController;
 import Board.WorkField;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -22,11 +24,12 @@ import static javax.swing.JOptionPane.QUESTION_MESSAGE;
  * Created by Lux on 29.03.2014.
  */
 public class ViewController extends JFrame {
-    private JTabbedPane tpnTools;
-    private JPanel pnlSurface;
     private JPanel pnlRoot;
+    private JPanel pnlSurface;
     private JPanel pnlAlgorithm;
     private JLabel lblMapLabel;
+    private JLabel lblProgress;
+    private JTabbedPane tpnTools;
 
     private JButton btnEmpty;
     private JButton btnObstacle;
@@ -37,6 +40,7 @@ public class ViewController extends JFrame {
     private JButton btnGenerate;
     private JButton btnSave;
     private JButton btnLoad;
+    private JSlider sldProgress;
 
     private Canvas canvas;
     private ArrayList<Node> solution;
@@ -49,10 +53,13 @@ public class ViewController extends JFrame {
     private int rowsAmount;
 
     public ViewController() {
-        setSize(850, 710);
         setTitle("RAY");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(1030, 885);
+        setResizable(false);
         setContentPane(pnlRoot);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        sldProgress.setMaximum(0);
+
         solution = new ArrayList<>();
         columnsAmount = rowsAmount = 16; // default value.
         workField = new WorkField(columnsAmount, rowsAmount);
@@ -72,18 +79,6 @@ public class ViewController extends JFrame {
     private String formTilesetPath(String tilesetName) {
         return System.getProperty("user.dir") + File.separator + "tilesets" + File.separator + tilesetName;
     }
-
-    private void resetInitBoard(){
-        workField = new WorkField(columnsAmount, rowsAmount);
-        fieldController.setWorkField(workField);
-    }
-
-    private void reset(){
-        solution.clear();
-        resetInitBoard();
-    }
-
-
 
     private void assignButtonIcons(){
         btnEmpty.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.FREE.getValue())));
@@ -138,6 +133,7 @@ public class ViewController extends JFrame {
         btnClear.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                resetSolutionSteps();
                 fieldController.clearField();
                 solution.clear();
                 canvas.repaint();
@@ -147,6 +143,8 @@ public class ViewController extends JFrame {
         btnGenerate.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                resetSolutionSteps();
+                fieldController.clearField();
                 fieldController.generateObjects(CellType.OBSTACLE);
                 canvas.repaint();
             }
@@ -188,23 +186,46 @@ public class ViewController extends JFrame {
                 fieldController.morphCells(CellType.PATH, CellType.FREE); // clear previous result.
                 Cell start = fieldController.findCell(CellType.EMITTER_START);
                 Cell finish = fieldController.findCell(CellType.EMITTER_FINISH);
-                assert start != null && finish != null;
+                if (start == null || finish == null) {
+                    showErrorMsg("DWF setup is not valid");
+                    return;
+                }
                 beamSA = new BeamSA(workField, start, finish);
                 if(beamSA.findSolution()) {
-                    solution = beamSA.getSolution();
-                    for (Node node : solution) {
-                        workField.setCellType(node.getX(), node.getY(), CellType.PATH);
-                    }
-                    canvas.repaint();
+                    showInfoMsg("Path had been found!");
                 } else {
-                  showErrorMsg("i am stuck!");
+                    showErrorMsg("i am stuck!");
                 }
+                solution = beamSA.getSolution();
+                sldProgress.setMaximum(solution.size());
+                for (Node node : solution) {
+                    workField.setCellType(node.getX(), node.getY(), CellType.PATH);
+                }
+                canvas.setSolution(solution);
+                canvas.repaint();
+            }
+        });
+
+        sldProgress.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                canvas.setSolutionStepsAmount(sldProgress.getValue());
+                canvas.repaint();
             }
         });
     }
 
+    private void resetSolutionSteps(){
+        canvas.setSolutionStepsAmount(0);
+        sldProgress.setMaximum(0);
+    }
+
     private void showErrorMsg(String errorText) {
         JOptionPane.showMessageDialog(this, errorText, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showInfoMsg(String infoText) {
+        JOptionPane.showMessageDialog(this, infoText, "Info", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private int getFieldRow(int y){
@@ -245,8 +266,8 @@ public class ViewController extends JFrame {
         @Override
         public void mouseDragged(MouseEvent e) {
             super.mouseDragged(e);
-            mouseMoved(e);
             workField.setCellType(getFieldColumn(e.getX()), getFieldRow(e.getY()), selectedCellType);
+            mouseMoved(e);
         }
     }
 }

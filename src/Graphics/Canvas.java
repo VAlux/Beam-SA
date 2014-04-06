@@ -4,6 +4,7 @@
 
 package Graphics;
 
+import AI.Node;
 import Board.WorkField;
 
 import javax.swing.*;
@@ -20,10 +21,14 @@ public class Canvas extends JPanel {
     private Font font;
     private Point selection;
     private Color selectionColor;
+    private Color solutionColor;
+    private Color fontColor;
     private WorkField workField;
     private Dimension tileSize;
     private ArrayList<BufferedImage> tiles;
     private TilesetProcessor tilesetProcessor;
+    private ArrayList<Node> solution;
+    private int solutionStepsAmount;
 
     public Canvas() throws IOException {
         super();
@@ -31,7 +36,10 @@ public class Canvas extends JPanel {
         tileSize = new Dimension();
         font = new Font("Arial", Font.TRUETYPE_FONT, 36);
         selectionColor = new Color(255, 255, 255, 90);
+        solutionColor = new Color(87, 36, 255, 100);
+        fontColor = new Color(0, 0, 0, 250);
         selection = new Point(-1, -1); // no selection by default.
+        solutionStepsAmount = 0;
     }
 
     public void loadTileset(String tilesetPath) {
@@ -47,8 +55,8 @@ public class Canvas extends JPanel {
         clear(G);
         setBackground(Color.GRAY);
         Graphics2D g2d = (Graphics2D) G;
+        g2d.setFont(font);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setPaint(selectionColor);
         tileSize.setSize(getWidth() / workField.getCollsAmount(), getHeight() / workField.getRowsAmount());
         for (int i = 0; i < workField.getRowsAmount(); i++) {
             for (int j = 0; j < workField.getCollsAmount(); j++) {
@@ -56,6 +64,19 @@ public class Canvas extends JPanel {
                         i * tileSize.width, j * tileSize.height, tileSize.width, tileSize.height, null);
             }
         }
+        if (solution != null) {
+            assert solutionStepsAmount <= solution.size();
+            for (int i = solution.size() - 1; i >= solution.size() - solutionStepsAmount; i--) {
+                g2d.setPaint(solutionColor);
+                g2d.fillRect(solution.get(i).getX() * tileSize.width, solution.get(i).getY() * tileSize.height,
+                        tileSize.width, tileSize.height);
+                g2d.setPaint(fontColor);
+                g2d.drawString(String.valueOf(solution.size() - i),
+                        solution.get(i).getX() * tileSize.width + (tileSize.width / 2 - 12),   // 12 is for (font size / 2)
+                        solution.get(i).getY() * tileSize.height + (tileSize.height - 12));
+            }
+        }
+        g2d.setPaint(selectionColor);
         if (selection.x >= 0)
             g2d.fillRect(selection.x * tileSize.width, selection.y * tileSize.height, tileSize.width, tileSize.height);
     }
@@ -74,5 +95,13 @@ public class Canvas extends JPanel {
 
     public TilesetProcessor getTilesetProcessor() {
         return tilesetProcessor;
+    }
+
+    public void setSolution(ArrayList<Node> solution) {
+        this.solution = solution;
+    }
+
+    public void setSolutionStepsAmount(int solutionStepsAmount) {
+        this.solutionStepsAmount = solutionStepsAmount;
     }
 }
