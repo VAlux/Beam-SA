@@ -30,7 +30,7 @@ public class BeamSA extends SearchAlgorithm{
 
     @Override
     public boolean findSolution(){
-        int maxOpenedNodesAmount = 10;
+        int maxOpenedNodesAmount = 1000;
         Node nextNode, prevNode = null;
         while(!getMinFitnessNode().equals(finish)){
             if(opened.isEmpty()) {

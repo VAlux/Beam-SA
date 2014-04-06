@@ -197,11 +197,12 @@ public class ViewController extends JFrame {
                     showErrorMsg("i am stuck!");
                 }
                 solution = beamSA.getSolution();
-                sldProgress.setMaximum(solution.size());
+                sldProgress.setMaximum(beamSA.getOpened().size());
+                canvas.setOpened(beamSA.getOpened());
+                canvas.setSolution(solution);
                 for (Node node : solution) {
                     workField.setCellType(node.getX(), node.getY(), CellType.PATH);
                 }
-                canvas.setSolution(solution);
                 canvas.repaint();
             }
         });
@@ -209,14 +210,14 @@ public class ViewController extends JFrame {
         sldProgress.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                canvas.setSolutionStepsAmount(sldProgress.getValue());
+                canvas.setOpenedStepsAmount(sldProgress.getValue());
                 canvas.repaint();
             }
         });
     }
 
     private void resetSolutionSteps(){
-        canvas.setSolutionStepsAmount(0);
+        canvas.setOpenedStepsAmount(0);
         sldProgress.setMaximum(0);
     }
 

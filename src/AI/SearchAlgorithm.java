@@ -35,4 +35,8 @@ public abstract class SearchAlgorithm {
         }
         return solution;
     }
+
+    public ArrayList<Node> getOpened() {
+        return opened;
+    }
 }
