@@ -30,7 +30,6 @@ public class BeamSA extends SearchAlgorithm{
 
     @Override
     public boolean findSolution(){
-        int maxOpenedNodesAmount = 1000;
         Node nextNode, prevNode = null;
         while(!getMinFitnessNode().equals(finish)){
             if(opened.isEmpty()) {
@@ -45,8 +44,6 @@ public class BeamSA extends SearchAlgorithm{
             nVert = nextNode;
             opened.remove(nVert);
             expandNode(nVert);
-            if (opened.size() > maxOpenedNodesAmount)
-                opened.remove(getMaxFitnessNode());
         }
         return true;
     }
@@ -73,10 +70,10 @@ public class BeamSA extends SearchAlgorithm{
 
     //package - local
     @Override
-    Node getMinFitnessNode(){
+    Node getMinFitnessNode() {
         Node minFitnessNode = opened.get(0);
-        for(Node vertex : opened){
-            if(minFitnessNode.getFitness() > vertex.getFitness()){
+        for (Node vertex : opened) {
+            if (minFitnessNode.getFitness() > vertex.getFitness()) {
                 minFitnessNode = vertex;
             }
         }

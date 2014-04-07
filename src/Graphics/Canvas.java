@@ -30,6 +30,7 @@ public class Canvas extends JPanel {
     private ArrayList<Node> solution;
     private ArrayList<Node> opened; // to restore lookup steps.
     private int openedStepsAmount;
+    private int solutionStepsAmount;
 
     public Canvas() throws IOException {
         super();
@@ -72,12 +73,12 @@ public class Canvas extends JPanel {
                         tileSize.width, tileSize.height);
             }
 
-            for (int i = solution.size() - 1; i >= solution.size() - openedStepsAmount / 8; i--) { // reverse lookup
-                g2d.setPaint(fontColor);
-                g2d.drawString(String.valueOf(solution.size() - i),
-                        solution.get(i).getX() * tileSize.width + (tileSize.width / 2 - 12),   // 12 is for (font size / 2)
-                        solution.get(i).getY() * tileSize.height + (tileSize.height - 12));
-            }
+//            for (int i = solution.size() - 1; i >= solution.size() - openedStepsAmount / 8; i--) { // reverse lookup
+//                g2d.setPaint(fontColor);
+//                g2d.drawString(String.valueOf(solution.size() - i),
+//                        solution.get(i).getX() * tileSize.width + (tileSize.width / 2 - 12),   // 12 is for (font size / 2)
+//                        solution.get(i).getY() * tileSize.height + (tileSize.height - 12));
+//            }
         }
         g2d.setPaint(selectionColor);
         if (selection.x >= 0)
@@ -110,5 +111,9 @@ public class Canvas extends JPanel {
 
     public void setOpenedStepsAmount(int openedStepsAmount) {
         this.openedStepsAmount = openedStepsAmount;
+    }
+
+    public void setSolutionStepsAmount(int solutionStepsAmount) {
+        this.solutionStepsAmount = solutionStepsAmount;
     }
 }

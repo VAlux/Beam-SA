@@ -54,7 +54,7 @@ public class Node {
         return cell.getxPos();
     }
 
-    public  int getY() {
+    public int getY() {
         return cell.getyPos();
     }
 }
