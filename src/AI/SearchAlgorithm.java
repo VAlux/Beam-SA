@@ -13,6 +13,7 @@ public abstract class SearchAlgorithm {
     protected Node finish;
     protected Node nVert;
     protected WorkField workField;
+    protected float execTime;
 
     // package - local methods
     abstract Node getMinFitnessNode();
@@ -38,5 +39,9 @@ public abstract class SearchAlgorithm {
 
     public ArrayList<Node> getOpened() {
         return opened;
+    }
+
+    public float getExecTime() {
+        return execTime / 1000000000; // 1 nanosecond is 1 * 10pow(-9)
     }
 }

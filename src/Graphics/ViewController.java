@@ -28,7 +28,6 @@ public class ViewController extends JFrame {
     private JPanel pnlSurface;
     private JPanel pnlAlgorithm;
     private JLabel lblMapLabel;
-    private JLabel lblProgress;
     private JTabbedPane tpnTools;
 
     private JButton btnEmpty;
@@ -41,6 +40,8 @@ public class ViewController extends JFrame {
     private JButton btnSave;
     private JButton btnLoad;
     private JSlider sldProgress;
+    private JLabel lblStatistics;
+    private JPanel pnlStatisticsBox;
 
     private Canvas canvas;
     private ArrayList<Node> solution;
@@ -54,7 +55,7 @@ public class ViewController extends JFrame {
 
     public ViewController() {
         setTitle("RAY");
-        setSize(1030, 885);
+        setSize(1005, 910);
         setResizable(false);
         setContentPane(pnlRoot);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -134,6 +135,7 @@ public class ViewController extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 resetSolutionSteps();
+                resetStatistics();
                 fieldController.clearField();
                 solution.clear();
                 canvas.repaint();
@@ -144,6 +146,7 @@ public class ViewController extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 resetSolutionSteps();
+                resetStatistics();
                 fieldController.clearField();
                 fieldController.generateObjects(CellType.OBSTACLE);
                 canvas.repaint();
@@ -173,6 +176,7 @@ public class ViewController extends JFrame {
                 if (choice == JFileChooser.APPROVE_OPTION) {
                     try {
                         fieldController.loadFromFile(chooser.getSelectedFile().getPath());
+                        resetStatistics();
                     } catch (IOException | NumberFormatException e1) {
                         showErrorMsg("Can't load file: " + chooser.getSelectedFile());
                     }
@@ -198,6 +202,7 @@ public class ViewController extends JFrame {
                 }
                 solution = beamSA.getSolution();
                 sldProgress.setMaximum(beamSA.getOpened().size());
+                updateStatistics();
                 canvas.setOpened(beamSA.getOpened());
                 canvas.setSolution(solution);
                 for (Node node : solution) {
@@ -214,6 +219,16 @@ public class ViewController extends JFrame {
                 canvas.repaint();
             }
         });
+    }
+
+    private void updateStatistics(){
+        lblStatistics.setText("Execution time: " + beamSA.getExecTime() +
+                              " ms | Path length: " + solution.size() +
+                              " nodes | Opened nodes amount: " + beamSA.getOpened().size());
+    }
+
+    private void resetStatistics(){
+        lblStatistics.setText("Ready...");
     }
 
     private void resetSolutionSteps(){

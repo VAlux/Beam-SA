@@ -22,6 +22,7 @@ public class BeamSA extends SearchAlgorithm{
         this.finish = new Node(finish);
         this.workField = workField;
         this.start = new Node(start);
+        execTime = 0;
         nVert = new Node(start);
         calcFitness(nVert); // Calc fitness for the initial vertex
         opened = new ArrayList<>();
@@ -31,6 +32,7 @@ public class BeamSA extends SearchAlgorithm{
     @Override
     public boolean findSolution(){
         Node nextNode, prevNode = null;
+        float startTime = System.nanoTime();
         while(!getMinFitnessNode().equals(finish)){
             if(opened.isEmpty()) {
                 return false;
@@ -45,6 +47,7 @@ public class BeamSA extends SearchAlgorithm{
             opened.remove(nVert);
             expandNode(nVert);
         }
+        execTime = System.nanoTime() - startTime;
         return true;
     }
 
