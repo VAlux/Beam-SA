@@ -27,7 +27,10 @@ public class ViewController extends JFrame {
     private JPanel pnlRoot;
     private JPanel pnlSurface;
     private JPanel pnlAlgorithm;
+    private JPanel pnlStatisticsBox;
     private JLabel lblMapLabel;
+    private JLabel lblStatistics;
+    private JSlider sldProgress;
     private JTabbedPane tpnTools;
 
     private JButton btnEmpty;
@@ -39,10 +42,9 @@ public class ViewController extends JFrame {
     private JButton btnGenerate;
     private JButton btnSave;
     private JButton btnLoad;
-    private JSlider sldProgress;
-    private JLabel lblStatistics;
-    private JPanel pnlStatisticsBox;
+    private JButton btnSettings;
 
+    private ViewController instance;
     private Canvas canvas;
     private ArrayList<Node> solution;
     private FieldController fieldController;
@@ -54,8 +56,8 @@ public class ViewController extends JFrame {
     private int rowsAmount;
 
     public ViewController() {
-        setTitle("RAY");
-        setSize(1005, 910);
+        setTitle("Beam");
+        setSize(992, 910);
         setResizable(false);
         setContentPane(pnlRoot);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -71,9 +73,10 @@ public class ViewController extends JFrame {
         MouseHandler handler = new MouseHandler();
         canvas.addMouseListener(handler);
         canvas.addMouseMotionListener(handler);
-        selectedCellType = CellType.OBSTACLE;
+        selectedCellType = CellType.FREE;
         assignButtonIcons();
         addActionListeners();
+        instance = this;
         setVisible(true);
     }
 
@@ -100,6 +103,16 @@ public class ViewController extends JFrame {
             e.printStackTrace();
         }
         canvas = (Canvas)pnlSurface; // we just need to communicate with pnlSurface as with canvas, so we morph it.
+    }
+
+    public void resizeField(int rowsAmount, int columnsAmount) {
+        this.rowsAmount = rowsAmount;
+        this.columnsAmount = columnsAmount;
+        fieldController.resizeField(rowsAmount, columnsAmount);
+        workField = fieldController.getWorkField(); // refresh the local workfield reference
+        canvas.setWorkField(workField);
+        resetStatistics();
+        sldProgress.setMaximum(0);
     }
 
     private void addActionListeners() {
@@ -184,6 +197,14 @@ public class ViewController extends JFrame {
             }
         });
 
+        btnSettings.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Settings settings = new Settings(instance);
+                settings.setVisible(true);
+            }
+        });
+
         btnFind.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -252,6 +273,14 @@ public class ViewController extends JFrame {
     private int getFieldColumn(int x) {
         double tileWidth = canvas.getWidth() / columnsAmount;
         return (int) Math.floor(x / tileWidth);
+    }
+
+    public int getColumnsAmount() {
+        return columnsAmount;
+    }
+
+    public int getRowsAmount() {
+        return rowsAmount;
     }
 
     private class MouseHandler extends MouseAdapter {

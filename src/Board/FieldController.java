@@ -83,7 +83,7 @@ public class FieldController {
         for (int i = 0; i < workField.getRowsAmount(); i++) {
             row = reader.readLine();
             cellTypes = row.split(" ");
-            for (int j = 0; j < workField.getCollsAmount(); j++) {
+            for (int j = 0; j < cellTypes.length; j++) {
                 workField.setCellType(i, j, CellType.fromValue(Integer.parseInt(cellTypes[j])));
             }
         }
@@ -91,5 +91,14 @@ public class FieldController {
 
     public void setWorkField(WorkField field){
         this.workField = field;
+    }
+
+    public WorkField getWorkField() {
+        return workField;
+    }
+
+    public void resizeField(int rowsAmount, int columnsAmount) {
+        workField = new WorkField(rowsAmount, columnsAmount);
+        initField();
     }
 }
