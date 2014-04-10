@@ -72,11 +72,12 @@
                 <properties>
                   <majorTickSpacing value="16"/>
                   <maximum value="256"/>
+                  <minimum value="8"/>
                   <minorTickSpacing value="8"/>
                   <paintLabels value="true"/>
                   <paintTicks value="true"/>
                   <snapToTicks value="true"/>
-                  <value value="0"/>
+                  <value value="8"/>
                 </properties>
               </component>
               <component id="71b86" class="javax.swing.JLabel" binding="lblRowsAmountText">
@@ -102,11 +103,12 @@
                 <properties>
                   <majorTickSpacing value="16"/>
                   <maximum value="256"/>
+                  <minimum value="8"/>
                   <minorTickSpacing value="8"/>
                   <paintLabels value="true"/>
                   <paintTicks value="true"/>
                   <snapToTicks value="true"/>
-                  <value value="0"/>
+                  <value value="8"/>
                 </properties>
               </component>
               <component id="ba7fe" class="javax.swing.JLabel" binding="lblColumnsAmountText">

@@ -173,6 +173,9 @@ public class ViewController extends JFrame {
                 if (filename == null)
                     return;
                 try {
+                    fieldController.morphCells(CellType.PATH, CellType.FREE);
+                    resetSolutionSteps();
+                    resetStatistics();
                     fieldController.saveToFile("maps/" + filename);
                 } catch (IOException e1) {
                     showErrorMsg("Filename is invalid or empty");
@@ -187,9 +190,10 @@ public class ViewController extends JFrame {
                 int choice;
                 choice = chooser.showDialog(canvas, "Open");
                 if (choice == JFileChooser.APPROVE_OPTION) {
+                    resetSolutionSteps();
+                    resetStatistics();
                     try {
                         fieldController.loadFromFile(chooser.getSelectedFile().getPath());
-                        resetStatistics();
                     } catch (IOException | NumberFormatException e1) {
                         showErrorMsg("Can't load file: " + chooser.getSelectedFile());
                     }

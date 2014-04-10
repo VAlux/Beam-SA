@@ -15,10 +15,11 @@ public abstract class SearchAlgorithm {
     protected WorkField workField;
     protected float execTime;
 
+
     // package - local methods
     abstract Node getMinFitnessNode();
     abstract Node getMaxFitnessNode();
-    abstract void expandNode(Node node);
+    abstract void expandNodeOD(Node node);
     abstract void calcFitness(Node node);
     //
     public abstract boolean findSolution();

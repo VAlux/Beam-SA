@@ -45,7 +45,7 @@ public class BeamSA extends SearchAlgorithm{
             nextNode.setParent(nVert);
             nVert = nextNode;
             opened.remove(nVert);
-            expandNode(nVert);
+            expandNodeOD(nVert);
         }
         execTime = System.nanoTime() - startTime;
         return true;
@@ -53,7 +53,7 @@ public class BeamSA extends SearchAlgorithm{
 
     // package - local
     @Override
-    void expandNode (Node node) {
+    void expandNodeOD(Node node) {
         Node neighbourNode;
         Cell neighbourCell;
         for (int i = node.getY() - 1; i <= node.getY() + 1; i++) {
@@ -69,6 +69,30 @@ public class BeamSA extends SearchAlgorithm{
                 }
             }
         }
+    }
+
+
+    ///TODO: testing. refactor this shit.
+    void expandNodeO(Node node) {
+        Node neighbourRight = new Node(workField.getCell(node.getX() + 1, node.getY()));
+        Node neighbourTop = new Node(workField.getCell(node.getX(), node.getY() + 1));
+        Node neighbourLeft= new Node(workField.getCell(node.getX() - 1, node.getY()));
+        Node neighbourBottom = new Node(workField.getCell(node.getX(), node.getY() - 1));
+
+        calcFitness(neighbourRight);
+        calcFitness(neighbourTop);
+        calcFitness(neighbourLeft);
+        calcFitness(neighbourBottom);
+
+        if (workField.getCell(node.getX() + 1, node.getY()).getType() != CellType.OBSTACLE)
+            opened.add(neighbourRight);
+        if (workField.getCell(node.getX(), node.getY() + 1).getType() != CellType.OBSTACLE)
+            opened.add(neighbourTop);
+        if (workField.getCell(node.getX() - 1, node.getY()).getType() != CellType.OBSTACLE)
+            opened.add(neighbourLeft);
+        if (workField.getCell(node.getX(), node.getY() - 1).getType() != CellType.OBSTACLE)
+            opened.add(neighbourBottom);
+
     }
 
     //package - local
