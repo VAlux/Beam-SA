@@ -81,7 +81,8 @@ public class ViewController extends JFrame {
     }
 
     private String formTilesetPath(String tilesetName) {
-        return System.getProperty("user.dir") + File.separator + "tilesets" + File.separator + tilesetName;
+        return getClass().getClassLoader().getResource("tilesets/" + tilesetName).getPath();
+//        return System.getProperty("user.dir") + File.separator + "tilesets" + File.separator + tilesetName;
     }
 
     private void assignButtonIcons(){
@@ -89,11 +90,11 @@ public class ViewController extends JFrame {
         btnObstacle.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.OBSTACLE.getValue())));
         btnEmrStart.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_START.getValue())));
         btnEmrFinish.setIcon(new ImageIcon(canvas.getTilesetProcessor().getTileAt(CellType.EMITTER_FINISH.getValue())));
-        btnFind.setIcon(new ImageIcon(getClass().getClassLoader().getResource("path.png")));
-        btnLoad.setIcon(new ImageIcon(getClass().getClassLoader().getResource("search.png")));
-        btnSave.setIcon(new ImageIcon(getClass().getClassLoader().getResource("save.png")));
-        btnClear.setIcon(new ImageIcon(getClass().getClassLoader().getResource("cancel.png")));
-        btnGenerate.setIcon(new ImageIcon(getClass().getClassLoader().getResource("setting.png")));
+        btnFind.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/path.png")));
+        btnLoad.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/search.png")));
+        btnSave.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/save.png")));
+        btnClear.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/cancel.png")));
+        btnGenerate.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/setting.png")));
     }
 
     private void createUIComponents() {
@@ -201,40 +202,34 @@ public class ViewController extends JFrame {
             }
         });
 
-        btnSettings.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Settings settings = new Settings(instance);
-                settings.setVisible(true);
-            }
+        btnSettings.addActionListener(e -> {
+            Settings settings = new Settings(instance);
+            settings.setVisible(true);
         });
 
-        btnFind.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fieldController.morphCells(CellType.PATH, CellType.FREE); // clear previous result.
-                Cell start = fieldController.findCell(CellType.EMITTER_START);
-                Cell finish = fieldController.findCell(CellType.EMITTER_FINISH);
-                if (start == null || finish == null) {
-                    showErrorMsg("DWF setup is not valid");
-                    return;
-                }
-                beamSA = new BeamSA(workField, start, finish);
-                if(beamSA.findSolution()) {
-                    showInfoMsg("Path had been found!");
-                } else {
-                    showErrorMsg("i am stuck!");
-                }
-                solution = beamSA.getSolution();
-                sldProgress.setMaximum(beamSA.getOpened().size());
-                updateStatistics();
-                canvas.setOpened(beamSA.getOpened());
-                canvas.setSolution(solution);
-                for (Node node : solution) {
-                    workField.setCellType(node.getX(), node.getY(), CellType.PATH);
-                }
-                canvas.repaint();
+        btnFind.addActionListener(e -> {
+            fieldController.morphCells(CellType.PATH, CellType.FREE); // clear previous result.
+            Cell start = fieldController.findCell(CellType.EMITTER_START);
+            Cell finish = fieldController.findCell(CellType.EMITTER_FINISH);
+            if (start == null || finish == null) {
+                showErrorMsg("DWF setup is not valid");
+                return;
             }
+            beamSA = new BeamSA(workField, start, finish);
+            if(beamSA.findSolution()) {
+                showInfoMsg("Path had been found!");
+            } else {
+                showErrorMsg("i am stuck!");
+            }
+            solution = beamSA.getSolution();
+            sldProgress.setMaximum(beamSA.getOpened().size());
+            updateStatistics();
+            canvas.setOpened(beamSA.getOpened());
+            canvas.setSolution(solution);
+            for (Node node : solution) {
+                workField.setCellType(node.getX(), node.getY(), CellType.PATH);
+            }
+            canvas.repaint();
         });
 
         sldProgress.addChangeListener(new ChangeListener() {
